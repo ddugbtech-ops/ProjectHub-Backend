@@ -42,5 +42,26 @@
     </div>
 
     <script src="{% static 'js/app.js' %}"></script>
+    
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyBK263TodJRlMuj2nM3fWL-TbBNZ1EeFy8",
+            authDomain: "projecthub-d7bfe.firebaseapp.com",
+            projectId: "projecthub-d7bfe",
+            storageBucket: "projecthub-d7bfe.firebasestorage.app",
+            messagingSenderId: "897437426423",
+            appId: "1:897437426423:web:c20faa30a7fea12dd0e9f2",
+            measurementId: "G-9SPXS2484E"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        console.log("Firebase Initialized");
+    </script>
 </body>
 </html>
