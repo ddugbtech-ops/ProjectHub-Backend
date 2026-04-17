@@ -16,3 +16,4 @@ staticfiles/
 env/
 venv/
 ENV/
+.firebase/
