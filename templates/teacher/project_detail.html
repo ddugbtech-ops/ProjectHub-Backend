@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.name }} - ProjectHub{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+        <div>
+            <h1>{{ project.name }}</h1>
+            <p style="color: var(--text-secondary);">Join Code: <code style="color: var(--accent-secondary); background: rgba(255,255,255,0.05); padding: 0.2rem 0.5rem; border-radius: 0.3rem;">{{ project.join_code }}</code></p>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{% url 'edit_project' project.id %}" class="btn btn-secondary">Edit Project</a>
+            <a href="{% url 'create_group' project.id %}" class="btn btn-secondary">+ Create Group</a>
+            <a href="{% url 'create_task' project.id %}" class="btn btn-primary">+ Assign Task</a>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+        <div>
+            <div class="glass-card" style="margin-bottom: 2rem;">
+                <h2 style="font-size: 1.25rem;">Project Tasks</h2>
+                {% if tasks %}
+                    <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+                        {% for task in tasks %}
+                            <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 0.5rem; border-left: 4px solid var(--accent-primary);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h3 style="font-size: 1.1rem; margin-bottom: 0;">{{ task.name }}</h3>
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <span class="badge badge-{{ task.status }}">{{ task.get_status_display }}</span>
+                                        <a href="{% url 'edit_task' task.id %}" style="color: var(--text-secondary); font-size: 0.8rem; text-decoration: none;">Edit</a>
+                                    </div>
+                                </div>
+                                <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.5rem 0;">{{ task.description|truncatechars:100 }}</p>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
+                                    <span>Assigned to: <strong>{{ task.assigned_to.get_full_name }}</strong></span>
+                                    <span>Due: {{ task.deadline }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="color: var(--text-secondary); margin-top: 1rem;">No tasks assigned yet.</p>
+                {% endif %}
+            </div>
+
+            <div class="glass-card">
+                <h2 style="font-size: 1.25rem;">Groups</h2>
+                {% if groups %}
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                        {% for group in groups %}
+                            <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 0.5rem;">
+                                <h3 style="font-size: 1rem;">{{ group.name }}</h3>
+                                <p style="font-size: 0.8rem; color: var(--text-secondary);">{{ group.members.count }} members</p>
+                                <ul style="list-style: none; margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-secondary);">
+                                    {% for member in group.members.all %}
+                                        <li>• {{ member.student.get_full_name }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="color: var(--text-secondary); margin-top: 1rem;">No groups created yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div>
+            <div class="glass-card" style="margin-bottom: 2rem;">
+                <h2 style="font-size: 1.25rem;">Manual Add Member</h2>
+                <form action="{% url 'add_member' project.id %}" method="POST" style="margin-top: 1rem;">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label style="font-size: 0.8rem;">Student Email</label>
+                        <input type="email" name="email" required placeholder="student@example.com" style="padding: 0.5rem;">
+                    </div>
+                    <button type="submit" class="btn btn-secondary" style="width: 100%; padding: 0.5rem;">Add Student</button>
+                </form>
+            </div>
+
+            <div class="glass-card" style="margin-bottom: 2rem;">
+                <h2 style="font-size: 1.25rem;">Project Members</h2>
+                {% if project_members %}
+                    <ul style="list-style: none; margin-top: 1rem;">
+                        {% for member in project_members %}
+                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--glass-border);">
+                                <span style="font-size: 0.9rem;">{{ member.student.get_full_name }}</span>
+                                {% if member.student.id in students_in_groups %}
+                                    <span style="font-size: 0.7rem; color: var(--success);">In Group</span>
+                                {% else %}
+                                    <span style="font-size: 0.7rem; color: var(--text-secondary);">Unassigned</span>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p style="color: var(--text-secondary); margin-top: 1rem;">No students joined yet.</p>
+                {% endif %}
+            </div>
+
+            <div class="glass-card">
+                <h2 style="font-size: 1.1rem;">About Project</h2>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem; white-space: pre-line;">{{ project.description }}</p>
+                <p style="margin-top: 1rem; font-size: 0.8rem;">Deadline: {{ project.deadline }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

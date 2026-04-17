@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Commits - ProjectHub{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <h1 style="margin-bottom: 2rem;">Student <span style="color: var(--accent-secondary);">Commits</span></h1>
+
+    {% if submissions %}
+        <div class="glass-card">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
+                        <th style="padding: 1rem;">Student</th>
+                        <th style="padding: 1rem;">Task</th>
+                        <th style="padding: 1rem;">Project</th>
+                        <th style="padding: 1rem;">Committed At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for submission in submissions %}
+                        <tr style="border-bottom: 1px solid var(--glass-border); background: rgba(255,255,255,0.02);">
+                            <td style="padding: 1rem;">{{ submission.student.get_full_name }}</td>
+                            <td style="padding: 1rem;">{{ submission.task.name }}</td>
+                            <td style="padding: 1rem;">{{ submission.task.project.name }}</td>
+                            <td style="padding: 1rem;">{{ submission.submitted_at|date:"M d, Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" style="padding: 0.5rem 1rem 1.5rem 1rem; color: var(--text-secondary); font-size: 0.9rem; border-bottom: 1px solid var(--glass-border);">
+                                <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 0.5rem; margin-top: 0.5rem;">
+                                    <strong>Commit Message:</strong><br>
+                                    <span style="white-space: pre-line;">{{ submission.description }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="glass-card" style="text-align: center; padding: 5rem;">
+            <p style="color: var(--text-secondary);">No commits received yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

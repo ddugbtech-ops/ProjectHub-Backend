@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="fade-in" style="text-align: center; margin-top: 5rem;">
+    <h1 style="font-size: 3.5rem; margin-bottom: 1.5rem;">Project Collaboration <span style="color: var(--accent-secondary);">Simplified.</span></h1>
+    <p style="color: var(--text-secondary); font-size: 1.25rem; max-width: 600px; margin: 0 auto 3rem auto;">
+        A powerful dual-portal system for teachers to manage projects and students to collaborate seamlessly.
+    </p>
+
+    <div style="display: flex; justify-content: center; gap: 2rem;">
+        <div class="glass-card" style="width: 350px;">
+            <h2 style="color: var(--accent-primary);">For Teachers</h2>
+            <p style="margin-bottom: 2rem; color: var(--text-secondary);">Create projects, assign tasks, and monitor student progress in real-time.</p>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <a href="{% url 'teacher_login' %}" class="btn btn-primary">Teacher Login</a>
+                <a href="{% url 'teacher_register' %}" class="btn btn-secondary">New Teacher? Register</a>
+            </div>
+        </div>
+
+        <div class="glass-card" style="width: 350px;">
+            <h2 style="color: var(--accent-secondary);">For Students</h2>
+            <p style="margin-bottom: 2rem; color: var(--text-secondary);">Join projects via code, track your tasks, and submit your work easily.</p>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <a href="{% url 'student_login' %}" class="btn btn-primary">Student Login</a>
+                <a href="{% url 'student_register' %}" class="btn btn-secondary">New Student? Register</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Project - {{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="fade-in" style="max-width: 600px; margin: 2rem auto;">
+    <div class="glass-card">
+        <h2 style="margin-bottom: 2rem;">Edit <span style="color: var(--accent-primary);">Project Details</span></h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Project Name</label>
+                <input type="text" name="name" value="{{ project.name }}" required>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" rows="5" required>{{ project.description }}</textarea>
+            </div>
+            <div class="form-group">
+                <label>Deadline</label>
+                <input type="date" name="deadline" value="{{ project.deadline|date:'Y-m-d' }}" required>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 2;">Save Changes</button>
+                <a href="{% url 'project_detail' project.id %}" class="btn btn-secondary" style="flex: 1;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

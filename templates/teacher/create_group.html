@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Group - {{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="fade-in" style="max-width: 600px; margin: 3rem auto;">
+    <div class="glass-card">
+        <h2 style="margin-bottom: 2rem;">Create <span style="color: var(--accent-secondary);">New Group</span></h2>
+        <p style="margin-bottom: 2rem; color: var(--text-secondary);">Project: {{ project.name }}</p>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Group Name</label>
+                <input type="text" name="name" required placeholder="e.g. Frontend Team">
+            </div>
+
+            <div class="form-group">
+                <label>Select Team Members</label>
+                <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0.5rem; max-height: 200px; overflow-y: auto; border: 1px solid var(--glass-border);">
+                    {% if project_members %}
+                        {% for member in project_members %}
+                            <div style="display: flex; align-items: center; gap: 1rem; padding: 0.5rem 0;">
+                                <input type="checkbox" name="students" value="{{ member.student.id }}" id="student_{{ member.student.id }}" style="width: auto;">
+                                <label for="student_{{ member.student.id }}" style="margin: 0; cursor: pointer;">{{ member.student.get_full_name }} ({{ member.student.email }})</label>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">No students have joined this project yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 2;">Create Group & Add Members</button>
+                <a href="{% url 'project_detail' project.id %}" class="btn btn-secondary" style="flex: 1;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ProjectHub{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <nav>
+        <a href="{% url 'home' %}" class="logo">ProjectHub</a>
+        <ul>
+            {% if user.is_authenticated %}
+                {% if user.profile.role == 'teacher' %}
+                    <li><a href="{% url 'teacher_dashboard' %}">Dashboard</a></li>
+                    <li><a href="{% url 'teacher_submissions' %}">Submissions</a></li>
+                {% else %}
+                    <li><a href="{% url 'student_dashboard' %}">Dashboard</a></li>
+                    <li><a href="{% url 'student_progress' %}">Progress</a></li>
+                {% endif %}
+                <li><a href="{% url 'logout' %}" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</a></li>
+            {% else %}
+                <li><a href="{% url 'home' %}">Home</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="glass-card" style="margin-bottom: 1rem; border-left: 5px solid var(--accent-secondary); padding: 1rem;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

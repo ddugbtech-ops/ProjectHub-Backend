@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Teacher Dashboard - ProjectHub{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1>Teacher <span style="color: var(--accent-primary);">Dashboard</span></h1>
+        <a href="{% url 'create_project' %}" class="btn btn-primary">+ Create New Project</a>
+    </div>
+
+    {% if projects %}
+        <div class="dashboard-grid">
+            {% for project in projects %}
+                <a href="{% url 'project_detail' project.id %}" style="text-decoration: none; color: inherit;">
+                    <div class="glass-card">
+                        <h3 style="margin-bottom: 0.5rem;">{{ project.name }}</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">
+                            {{ project.description|truncatechars:100 }}
+                        </p>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">Join Code:</span>
+                            <code style="background: rgba(255,255,255,0.1); padding: 0.2rem 0.5rem; border-radius: 0.3rem; color: var(--accent-secondary);">{{ project.join_code }}</code>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">Deadline:</span>
+                            <span style="font-size: 0.8rem;">{{ project.deadline }}</span>
+                        </div>
+
+                        <div class="btn btn-secondary" style="width: 100%; text-align: center;">View Project Details →</div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="glass-card" style="text-align: center; padding: 5rem;">
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">You haven't created any projects yet.</p>
+            <a href="{% url 'create_project' %}" class="btn btn-primary">Create Your First Project</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Assign Task - {{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="fade-in" style="max-width: 600px; margin: 3rem auto;">
+    <div class="glass-card">
+        <h2 style="margin-bottom: 2rem;">Assign <span style="color: var(--accent-primary);">New Task</span></h2>
+        <p style="margin-bottom: 2rem; color: var(--text-secondary);">Project: {{ project.name }}</p>
+        
+        <form method="POST" id="taskForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Task Name</label>
+                <input type="text" name="name" required placeholder="e.g. Design Login Page">
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" rows="4" required placeholder="Describe the task in detail..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Filter by Group (Optional)</label>
+                <select name="group" id="groupSelect">
+                    <option value="" selected>--- Show All Project Members ---</option>
+                    {% for g in groups %}
+                        <option value="{{ g.id }}">{{ g.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Assign to Dedicated Student</label>
+                <select name="assigned_to" id="studentSelect" required>
+                    <option value="" disabled selected>Select a student...</option>
+                    {% for member in project_members %}
+                        <option value="{{ member.student.id }}" data-groups="{% for g in member.student.group_memberships.all %}{{ g.group.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
+                            {{ member.student.get_full_name }} ({{ member.student.email }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Deadline</label>
+                <input type="date" name="deadline" required>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 2;">Assign Task to Student</button>
+                <a href="{% url 'project_detail' project.id %}" class="btn btn-secondary" style="flex: 1;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const groupSelect = document.getElementById('groupSelect');
+    const studentSelect = document.getElementById('studentSelect');
+    const allOptions = Array.from(studentSelect.options);
+
+    groupSelect.addEventListener('change', function() {
+        const groupId = this.value;
+        
+        // Reset and clear
+        studentSelect.innerHTML = '<option value="" disabled selected>Select a student...</option>';
+        
+        allOptions.forEach(option => {
+            if (option.value === "") return; // Skip placeholder
+            
+            const studentGroups = option.getAttribute('data-groups').split(',');
+            
+            if (groupId === "" || studentGroups.includes(groupId)) {
+                studentSelect.appendChild(option.cloneNode(true));
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Join Project - ProjectHub{% endblock %}
+
+{% block content %}
+<div class="fade-in" style="max-width: 450px; margin: 5rem auto;">
+    <div class="glass-card">
+        <h2 style="text-align: center; margin-bottom: 2rem;">Join <span style="color: var(--accent-secondary);">Project</span></h2>
+        <p style="text-align: center; margin-bottom: 2rem; color: var(--text-secondary);">Enter the 8-digit code provided by your teacher.</p>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Project Join Code</label>
+                <input type="text" name="join_code" required placeholder="e.g. AB12CD34" style="text-transform: uppercase; text-align: center; font-size: 1.5rem; letter-spacing: 0.2rem;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Join Project Now</button>
+            <a href="{% url 'student_dashboard' %}" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">Back to Dashboard</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

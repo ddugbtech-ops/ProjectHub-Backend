@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Commit Task - {{ task.name }}{% endblock %}
+
+{% block content %}
+<div class="fade-in" style="max-width: 600px; margin: 3rem auto;">
+    <div class="glass-card">
+        <h2 style="margin-bottom: 2rem;">Commit <span style="color: var(--accent-secondary);">Task</span></h2>
+        <p style="margin-bottom: 2rem; color: var(--text-secondary);">Project: {{ task.project.name }} | Task: {{ task.name }}</p>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Commit Message / Summary of Work</label>
+                <textarea name="description" rows="6" required placeholder="Describe what you have done for this task..."></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 2;">Commit Work</button>
+                <a href="{% url 'task_detail' task.id %}" class="btn btn-secondary" style="flex: 1;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

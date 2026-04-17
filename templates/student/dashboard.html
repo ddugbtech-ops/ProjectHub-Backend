@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard - ProjectHub{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1>Student <span style="color: var(--accent-secondary);">Dashboard</span></h1>
+        <a href="{% url 'join_project' %}" class="btn btn-primary">Join New Project</a>
+    </div>
+
+    <div style="margin-bottom: 3rem;">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Your Projects</h2>
+        {% if projects %}
+            <div class="dashboard-grid">
+                {% for project in projects %}
+                    <a href="{% url 'student_project_detail' project.id %}" style="text-decoration: none; color: inherit;">
+                        <div class="glass-card">
+                            <h3>{{ project.name }}</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.9rem;">{{ project.description|truncatechars:100 }}</p>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 0.8rem; color: var(--text-secondary);">Deadline: {{ project.deadline }}</span>
+                                <span style="font-size: 0.8rem; color: var(--accent-secondary);">View Details →</span>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="glass-card" style="text-align: center; padding: 3rem;">
+                <p style="color: var(--text-secondary);">You haven't joined any projects yet.</p>
+                <a href="{% url 'join_project' %}" style="color: var(--accent-secondary); text-decoration: none; margin-top: 1rem; display: inline-block;">Join a project now →</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div>
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Tasks Assigned to You</h2>
+        {% if tasks %}
+            <div class="dashboard-grid">
+                {% for task in tasks %}
+                    <div class="glass-card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                            <h3>{{ task.name }}</h3>
+                            <span class="badge badge-{{ task.status }}">
+                                {{ task.get_status_display }}
+                            </span>
+                        </div>
+                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">
+                            {{ task.description|truncatechars:80 }}
+                        </p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">Project: {{ task.project.name }}</span>
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">Due: {{ task.deadline }}</span>
+                        </div>
+                        <div style="display: flex; gap: 1rem;">
+                            <a href="{% url 'task_detail' task.id %}" class="btn btn-secondary" style="flex: 1; padding: 0.5rem;">View</a>
+                            {% if task.status != 'completed' %}
+                                <a href="{% url 'submit_work' task.id %}" class="btn btn-primary" style="flex: 1; padding: 0.5rem;">Commit</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="glass-card" style="text-align: center; padding: 3rem;">
+                <p style="color: var(--text-secondary);">No tasks assigned specifically to you yet.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

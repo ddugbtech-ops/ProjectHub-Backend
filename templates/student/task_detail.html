@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Task Details - {{ task.name }}{% endblock %}
+
+{% block content %}
+<div class="fade-in" style="max-width: 800px; margin: 2rem auto;">
+    <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h1>{{ task.name }}</h1>
+            <span class="badge badge-{{ task.status }}">{{ task.get_status_display }}</span>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <h3 style="color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.5rem;">Project</h3>
+            <p>{{ task.project.name }}</p>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <h3 style="color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.5rem;">Description</h3>
+            <p style="white-space: pre-line; font-size: 1.1rem;">{{ task.description }}</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 3rem; background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 0.5rem;">
+            <div>
+                <h3 style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Deadline</h3>
+                <p style="font-weight: 600;">{{ task.deadline }}</p>
+            </div>
+            <div>
+                <h3 style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Assignee</h3>
+                <p style="font-weight: 600;">{{ task.assigned_to.get_full_name }} {% if task.assigned_to == user %}(You){% endif %}</p>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+            {% if task.assigned_to == user and task.status != 'completed' %}
+                <a href="{% url 'submit_work' task.id %}" class="btn btn-primary" style="flex: 2;">Commit Your Work</a>
+            {% endif %}
+            <a href="{% url 'student_project_detail' task.project.id %}" class="btn btn-secondary" style="flex: 1;">Back to Project</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
