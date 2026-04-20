@@ -76,3 +76,14 @@ def user_logout(request):
 
 def home(request):
     return render(request, 'home.html')
+from django.core.management import call_command
+from django.http import HttpResponse
+import io
+
+def run_migrations(request):
+    out = io.StringIO()
+    try:
+        call_command('migrate', stdout=out, stderr=out)
+        return HttpResponse(f"<pre>{out.getvalue()}</pre>")
+    except Exception as e:
+        return HttpResponse(f"<pre>Error: {str(e)}\n\n{out.getvalue()}</pre>", status=500)
