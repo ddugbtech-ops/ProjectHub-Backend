@@ -21,6 +21,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('migrate-db-run/', views_auth.run_migrations),
     path('', include('core.urls')),
 ]
 

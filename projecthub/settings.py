@@ -18,8 +18,8 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-jprhg5y0t=71l&30+oresc$_=&_optkx95g2#$mzhw$egrzl@$')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG', default=False)
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', '.render.com', '*'])
+DEBUG = True
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
