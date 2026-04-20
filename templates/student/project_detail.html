@@ -5,9 +5,13 @@
 {% block content %}
 <div class="fade-in">
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
-        <div>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
             <h1>{{ project.name }}</h1>
-            <p style="color: var(--text-secondary);">Project Dashboard</p>
+            {% if final_submission %}
+                <span class="badge badge-completed" style="width: fit-content; padding: 0.5rem 1rem;">✓ Final Project Submitted</span>
+            {% else %}
+                <a href="{% url 'submit_project_final' project.id %}" class="btn btn-primary" style="width: fit-content; padding: 0.5rem 1rem; font-size: 0.85rem;">Submit Final Project</a>
+            {% endif %}
         </div>
         <div style="text-align: right;">
             <p style="color: var(--text-secondary); font-size: 0.9rem;">My Progress</p>
@@ -57,13 +61,54 @@
                 </div>
             </div>
 
+            <div class="glass-card" style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 style="font-size: 1.25rem; margin: 0;">My <span style="color: var(--accent-secondary);">Group</span></h2>
+                    {% if not user_group %}
+                        <div style="display: flex; gap: 0.5rem;">
+                            <a href="{% url 'join_group' %}" class="btn btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.8rem;">Join Group</a>
+                            <a href="{% url 'create_group' project.id %}" class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.8rem;">Create Group</a>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'student_group_detail' user_group.id %}" class="btn btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.8rem;">View Group Details →</a>
+                    {% endif %}
+                </div>
+
+                {% if user_group %}
+                    <div style="background: rgba(255,255,255,0.03); padding: 1.25rem; border-radius: 0.75rem; border-left: 5px solid var(--accent-secondary);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <h3 style="margin-bottom: 0.25rem;">{{ user_group.name }}</h3>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary);">Leader: {{ user_group.leader.get_full_name }}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Join Code</p>
+                                <code style="background: rgba(255,255,255,0.1); padding: 0.2rem 0.5rem; border-radius: 0.3rem; color: var(--accent-secondary); font-size: 1rem; font-weight: bold;">{{ user_group.join_code }}</code>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            {% for member in user_group.members.all %}
+                                <span style="background: rgba(255,255,255,0.05); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.8rem;">
+                                    {{ member.student.get_full_name }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">You are not in a group yet. Join one using a code or create your own!</p>
+                {% endif %}
+            </div>
+
             <div class="glass-card">
-                <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem;">Project Groups</h2>
+                <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem;">All Project Groups</h2>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
                     {% if groups %}
                         {% for group in groups %}
-                            <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 0.5rem;">
-                                <h3 style="font-size: 1rem; margin-bottom: 0.5rem; color: var(--accent-secondary);">{{ group.name }}</h3>
+                            <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 0.5rem; border: 1px solid {% if group == user_group %}var(--accent-secondary){% else %}transparent{% endif %};">
+                                <h3 style="font-size: 1rem; margin-bottom: 0.5rem; color: var(--accent-secondary);">
+                                    {{ group.name }}
+                                    {% if group == user_group %} <small style="color: var(--text-primary); font-size: 0.6rem; vertical-align: middle;">(YOURS)</small>{% endif %}
+                                </h3>
                                 <ul style="list-style: none; font-size: 0.8rem; color: var(--text-secondary);">
                                     {% for member in group.members.all %}
                                         <li {% if member.student == user %}style="color: var(--text-primary); font-weight: 600;"{% endif %}>
@@ -91,6 +136,44 @@
                         </li>
                     {% endfor %}
                 </ul>
+            </div>
+
+            <div class="glass-card" style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h1>Project <span style="color: var(--accent-primary);">Details</span></h1>
+                    {% if final_submission %}
+                        <span class="badge badge-completed" style="padding: 0.75rem 1.5rem; font-size: 0.9rem;">✓ Project Submitted</span>
+                    {% else %}
+                        <a href="{% url 'submit_project_final' project.id %}" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">Submit Final Project</a>
+                    {% endif %}
+                </div>
+                
+                <form action="{% url 'student_post_message' project.id %}" method="POST" style="margin-bottom: 1.5rem;">
+                    {% csrf_token %}
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" name="content" required placeholder="Ask a query or share an update..." style="flex: 1; padding: 0.6rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 0.5rem; color: var(--text-primary); font-size: 0.9rem;">
+                        <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1rem;">Send</button>
+                    </div>
+                </form>
+
+                <div style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; padding-right: 0.5rem;">
+                    {% if messages %}
+                        {% for msg in messages %}
+                            <div style="background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: 0.5rem; border-left: 3px solid {% if msg.user.profile.role == 'teacher' %}var(--accent-secondary){% else %}var(--accent-primary){% endif %};">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                    <span style="font-size: 0.8rem; font-weight: bold; color: {% if msg.user.profile.role == 'teacher' %}var(--accent-secondary){% else %}var(--text-primary){% endif %};">
+                                        {{ msg.user.get_full_name }} 
+                                        {% if msg.user.profile.role == 'teacher' %}<small style="font-size: 0.6rem; vertical-align: middle;">(Teacher)</small>{% endif %}
+                                    </span>
+                                    <span style="font-size: 0.7rem; color: var(--text-secondary);">{{ msg.created_at|date:"M d, H:i" }}</span>
+                                </div>
+                                <p style="font-size: 0.85rem; margin: 0; line-height: 1.4;">{{ msg.content }}</p>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="text-align: center; color: var(--text-secondary); font-size: 0.85rem; margin-top: 1rem;">No messages yet. Start the discussion!</p>
+                    {% endif %}
+                </div>
             </div>
 
             <div class="glass-card">

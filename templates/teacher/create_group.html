@@ -20,9 +20,15 @@
                 <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0.5rem; max-height: 200px; overflow-y: auto; border: 1px solid var(--glass-border);">
                     {% if project_members %}
                         {% for member in project_members %}
-                            <div style="display: flex; align-items: center; gap: 1rem; padding: 0.5rem 0;">
-                                <input type="checkbox" name="students" value="{{ member.student.id }}" id="student_{{ member.student.id }}" style="width: auto;">
-                                <label for="student_{{ member.student.id }}" style="margin: 0; cursor: pointer;">{{ member.student.get_full_name }} ({{ member.student.email }})</label>
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <input type="checkbox" name="students" value="{{ member.student.id }}" id="student_{{ member.student.id }}" style="width: auto;">
+                                    <label for="student_{{ member.student.id }}" style="margin: 0; cursor: pointer;">{{ member.student.get_full_name }}</label>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="radio" name="leader" value="{{ member.student.id }}" id="leader_{{ member.student.id }}" style="width: auto;">
+                                    <label for="leader_{{ member.student.id }}" style="font-size: 0.75rem; color: var(--text-secondary); cursor: pointer;">Mark Leader</label>
+                                </div>
                             </div>
                         {% endfor %}
                     {% else %}

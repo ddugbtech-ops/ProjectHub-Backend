@@ -31,11 +31,30 @@
             </div>
         </div>
 
-        <div style="display: flex; gap: 1rem;">
-            {% if task.assigned_to == user and task.status != 'completed' %}
-                <a href="{% url 'submit_work' task.id %}" class="btn btn-primary" style="flex: 2;">Commit Your Work</a>
-            {% endif %}
-            <a href="{% url 'student_project_detail' task.project.id %}" class="btn btn-secondary" style="flex: 1;">Back to Project</a>
+        {% if task.assigned_to == user and task.status != 'completed' %}
+            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--glass-border);">
+                <h3 style="margin-bottom: 1.5rem;">Submit your <span style="color: var(--accent-secondary);">Work</span></h3>
+                <form action="{% url 'submit_work' task.id %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Submission Description</label>
+                        <textarea name="description" rows="3" required placeholder="What have you completed?" style="width: 100%; padding: 0.8rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.5rem; color: var(--text-primary);"></textarea>
+                    </div>
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label>Attachment (Optional)</label>
+                        <input type="file" name="file" style="width: 100%; padding: 0.8rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.5rem; color: var(--text-primary);">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 1.5rem; width: 100%;">Submit Work</button>
+                </form>
+            </div>
+        {% elif task.status == 'completed' %}
+            <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 0.5rem; border: 1px solid rgba(16, 185, 129, 0.2); text-align: center;">
+                <p style="color: #10b981; font-weight: 600; margin: 0;">✓ This task has been completed and submitted.</p>
+            </div>
+        {% endif %}
+
+        <div style="margin-top: 2rem;">
+            <a href="{% url 'student_project_detail' task.project.id %}" class="btn btn-secondary" style="width: 100%;">Back to Project Dashboard</a>
         </div>
     </div>
 </div>

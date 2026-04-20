@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Group - {{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="fade-in" style="max-width: 600px; margin: 3rem auto;">
+    <div class="glass-card">
+        <h2 style="margin-bottom: 2rem;">Edit <span style="color: var(--accent-secondary);">Group</span></h2>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Group Name</label>
+                <input type="text" name="name" value="{{ group.name }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Select Team Members</label>
+                <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0.5rem; max-height: 200px; overflow-y: auto; border: 1px solid var(--glass-border);">
+                    {% for member in project_members %}
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <input type="checkbox" name="students" value="{{ member.student.id }}" id="student_{{ member.student.id }}" style="width: auto;" {% if member.student.id in current_members %}checked{% endif %}>
+                                <label for="student_{{ member.student.id }}" style="margin: 0; cursor: pointer;">{{ member.student.get_full_name }}</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="radio" name="leader" value="{{ member.student.id }}" id="leader_{{ member.student.id }}" style="width: auto;" {% if member.student == group.leader %}checked{% endif %}>
+                                <label for="leader_{{ member.student.id }}" style="font-size: 0.75rem; color: var(--text-secondary); cursor: pointer;">Mark Leader</label>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 2;">Save Changes</button>
+                <a href="{% url 'project_detail' group.project.id %}" class="btn btn-secondary" style="flex: 1;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

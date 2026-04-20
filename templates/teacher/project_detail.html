@@ -49,12 +49,25 @@
                 {% if groups %}
                     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
                         {% for group in groups %}
-                            <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 0.5rem;">
-                                <h3 style="font-size: 1rem;">{{ group.name }}</h3>
-                                <p style="font-size: 0.8rem; color: var(--text-secondary);">{{ group.members.count }} members</p>
-                                <ul style="list-style: none; margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-secondary);">
+                            <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 0.5rem; border-top: 3px solid var(--accent-secondary);">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                                    <h3 style="font-size: 1rem; margin: 0;">{{ group.name }}</h3>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <a href="{% url 'edit_group' group.id %}" style="font-size: 0.7rem; color: var(--text-secondary); text-decoration: none;">Edit</a>
+                                        <code style="font-size: 0.65rem; color: var(--accent-secondary);">{{ group.join_code }}</code>
+                                    </div>
+                                </div>
+                                <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.75rem;">Leader: <strong>{{ group.leader.get_full_name|default:"None" }}</strong></p>
+                                <ul style="list-style: none; font-size: 0.75rem; color: var(--text-secondary);">
                                     {% for member in group.members.all %}
-                                        <li>• {{ member.student.get_full_name }}</li>
+                                        <li {% if member.student == group.leader %}style="color: var(--text-primary); font-weight: 600;"{% endif %}>
+                                            • {{ member.student.get_full_name }}
+                                            {% for pm in project_members %}
+                                                {% if pm.student == member.student and pm.avg_rating %}
+                                                    <span style="color: gold; font-size: 0.6rem; margin-left: 0.5rem;">★ {{ pm.avg_rating|floatformat:1 }}</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -80,12 +93,54 @@
             </div>
 
             <div class="glass-card" style="margin-bottom: 2rem;">
+                <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">Project <span style="color: var(--accent-secondary);">Health</span></h2>
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <div style="width: 200px; height: 200px;">
+                        <canvas id="projectStatusChart"></canvas>
+                    </div>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem; font-size: 0.8rem; color: var(--text-secondary);">
+                        <span>To Do: <strong>{{ todo_count }}</strong></span>
+                        <span>In Progress: <strong>{{ in_progress_count }}</strong></span>
+                        <span>Done: <strong>{{ completed_count }}</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                const ctx2 = document.getElementById('projectStatusChart').getContext('2d');
+                new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['To Do', 'In Progress', 'Completed'],
+                        datasets: [{
+                            data: [{{ todo_count }}, {{ in_progress_count }}, {{ completed_count }}],
+                            backgroundColor: ['#6366f1', '#f59e0b', '#10b981'],
+                            borderWidth: 0,
+                            hoverOffset: 15
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        cutout: '75%'
+                    }
+                });
+            </script>
+
+            <div class="glass-card" style="margin-bottom: 2rem;">
                 <h2 style="font-size: 1.25rem;">Project Members</h2>
                 {% if project_members %}
                     <ul style="list-style: none; margin-top: 1rem;">
                         {% for member in project_members %}
                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--glass-border);">
-                                <span style="font-size: 0.9rem;">{{ member.student.get_full_name }}</span>
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="font-size: 0.9rem;">{{ member.student.get_full_name }}</span>
+                                    {% if member.avg_rating %}
+                                        <span style="font-size: 0.7rem; color: gold;">★ {{ member.avg_rating|floatformat:1 }} Peer Rating</span>
+                                    {% endif %}
+                                </div>
                                 {% if member.student.id in students_in_groups %}
                                     <span style="font-size: 0.7rem; color: var(--success);">In Group</span>
                                 {% else %}
@@ -97,6 +152,37 @@
                 {% else %}
                     <p style="color: var(--text-secondary); margin-top: 1rem;">No students joined yet.</p>
                 {% endif %}
+            </div>
+
+            <div class="glass-card" style="margin-bottom: 2rem;">
+                <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem;">Project <span style="color: var(--accent-secondary);">Discussion</span></h2>
+                
+                <form action="{% url 'teacher_post_message' project.id %}" method="POST" style="margin-bottom: 1.5rem;">
+                    {% csrf_token %}
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" name="content" required placeholder="Send an announcement or answer a query..." style="flex: 1; padding: 0.6rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 0.5rem; color: var(--text-primary); font-size: 0.9rem;">
+                        <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1rem;">Post</button>
+                    </div>
+                </form>
+
+                <div style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; padding-right: 0.5rem;">
+                    {% if messages %}
+                        {% for msg in messages %}
+                            <div style="background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: 0.5rem; border-left: 3px solid {% if msg.user.profile.role == 'teacher' %}var(--accent-secondary){% else %}var(--accent-primary){% endif %};">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                    <span style="font-size: 0.8rem; font-weight: bold; color: {% if msg.user.profile.role == 'teacher' %}var(--accent-secondary){% else %}var(--text-primary){% endif %};">
+                                        {{ msg.user.get_full_name }} 
+                                        {% if msg.user.profile.role == 'teacher' %}<small style="font-size: 0.6rem; vertical-align: middle;">(You)</small>{% endif %}
+                                    </span>
+                                    <span style="font-size: 0.7rem; color: var(--text-secondary);">{{ msg.created_at|date:"M d, H:i" }}</span>
+                                </div>
+                                <p style="font-size: 0.85rem; margin: 0; line-height: 1.4;">{{ msg.content }}</p>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="text-align: center; color: var(--text-secondary); font-size: 0.85rem; margin-top: 1rem;">No messages yet. Start the discussion!</p>
+                    {% endif %}
+                </div>
             </div>
 
             <div class="glass-card">

@@ -8,11 +8,16 @@
         <h2 style="margin-bottom: 2rem;">Commit <span style="color: var(--accent-secondary);">Task</span></h2>
         <p style="margin-bottom: 2rem; color: var(--text-secondary);">Project: {{ task.project.name }} | Task: {{ task.name }}</p>
         
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-group">
                 <label>Commit Message / Summary of Work</label>
                 <textarea name="description" rows="6" required placeholder="Describe what you have done for this task..."></textarea>
+            </div>
+            
+            <div class="form-group" style="margin-top: 1rem;">
+                <label>Upload File (PPT, PDF, ZIP, etc.)</label>
+                <input type="file" name="file" style="width: 100%; padding: 0.8rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.5rem; color: var(--text-primary); margin-top: 0.5rem;">
             </div>
             
             <div style="display: flex; gap: 1rem; margin-top: 2rem;">

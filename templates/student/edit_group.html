@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Group - {{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="fade-in" style="max-width: 500px; margin: 3rem auto;">
+    <div class="glass-card">
+        <h2 style="margin-bottom: 2rem;">Edit <span style="color: var(--accent-secondary);">Group</span></h2>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Group Name</label>
+                <input type="text" name="name" value="{{ group.name }}" required style="width: 100%; padding: 0.8rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.5rem; color: var(--text-primary);">
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 2;">Save Changes</button>
+                <a href="{% url 'student_group_detail' group.id %}" class="btn btn-secondary" style="flex: 1;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

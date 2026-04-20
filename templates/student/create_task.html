@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Assign Task - {{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="fade-in" style="max-width: 600px; margin: 3rem auto;">
+    <div class="glass-card">
+        <h2 style="margin-bottom: 2rem;">Assign Group <span style="color: var(--accent-secondary);">Task</span></h2>
+        <p style="margin-bottom: 2rem; color: var(--text-secondary);">Group: {{ group.name }} | Project: {{ group.project.name }}</p>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Task Name</label>
+                <input type="text" name="name" required placeholder="e.g. Design UI Mockups" style="width: 100%; padding: 0.8rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.5rem; color: var(--text-primary);">
+            </div>
+            
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label>Description</label>
+                <textarea name="description" rows="4" required placeholder="Describe the task requirements..." style="width: 100%; padding: 0.8rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.5rem; color: var(--text-primary);"></textarea>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                <div class="form-group">
+                    <label>Assign To Member</label>
+                    <select name="assigned_to" required style="width: 100%; padding: 0.8rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.5rem; color: var(--text-primary);">
+                        {% for member in members %}
+                            <option value="{{ member.id }}">{{ member.get_full_name }} {% if member == user %}(You){% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Deadline</label>
+                    <input type="date" name="deadline" required style="width: 100%; padding: 0.8rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.5rem; color: var(--text-primary);">
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 2.5rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 2;">Assign Task</button>
+                <a href="{% url 'student_group_detail' group.id %}" class="btn btn-secondary" style="flex: 1;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

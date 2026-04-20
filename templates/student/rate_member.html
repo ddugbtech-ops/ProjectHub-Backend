@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Rate {{ ratee.get_full_name }} - {{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="fade-in" style="max-width: 500px; margin: 3rem auto;">
+    <div class="glass-card">
+        <h2 style="margin-bottom: 1rem;">Rate <span style="color: var(--accent-secondary);">Teamwork</span></h2>
+        <p style="margin-bottom: 2rem; color: var(--text-secondary);">Providing feedback for: <strong>{{ ratee.get_full_name }}</strong></p>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                <div class="form-group">
+                    <label>Contribution (Workload shared)</label>
+                    <div style="display: flex; gap: 0.75rem; justify-content: space-between; margin-top: 0.5rem;">
+                        {% for i in "12345" %}
+                            <label style="cursor: pointer; flex: 1; text-align: center;">
+                                <input type="radio" name="contribution" value="{{ i }}" required style="display: none;" class="rating-input">
+                                <div class="rating-box" style="padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 0.5rem; transition: all 0.3s;">{{ i }}</div>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Communication (Responsiveness)</label>
+                    <div style="display: flex; gap: 0.75rem; justify-content: space-between; margin-top: 0.5rem;">
+                        {% for i in "12345" %}
+                            <label style="cursor: pointer; flex: 1; text-align: center;">
+                                <input type="radio" name="communication" value="{{ i }}" required style="display: none;" class="rating-input">
+                                <div class="rating-box" style="padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 0.5rem; transition: all 0.3s;">{{ i }}</div>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Collaboration (Team spirit)</label>
+                    <div style="display: flex; gap: 0.75rem; justify-content: space-between; margin-top: 0.5rem;">
+                        {% for i in "12345" %}
+                            <label style="cursor: pointer; flex: 1; text-align: center;">
+                                <input type="radio" name="collaboration" value="{{ i }}" required style="display: none;" class="rating-input">
+                                <div class="rating-box" style="padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 0.5rem; transition: all 0.3s;">{{ i }}</div>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 2rem;">
+                <label>Comment (Optional)</label>
+                <textarea name="comment" rows="4" placeholder="How was their contribution? Any specific feedback?" style="width: 100%; padding: 0.8rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.5rem; color: var(--text-primary);"></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 2.5rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 2;">Submit Rating</button>
+                <a href="{% url 'student_group_detail' group.id %}" class="btn btn-secondary" style="flex: 1;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .rating-input:checked + .rating-box {
+        background: var(--accent-secondary) !important;
+        color: white;
+        border-color: var(--accent-secondary);
+        transform: scale(1.1);
+    }
+</style>
+{% endblock %}

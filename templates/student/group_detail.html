@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ group.name }} - Group Details{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <h1>{{ group.name }}</h1>
+                {% if is_leader %}
+                    <a href="{% url 'student_edit_group' group.id %}" style="font-size: 0.8rem; color: var(--text-secondary); text-decoration: none;">Edit Name</a>
+                {% endif %}
+            </div>
+            <p style="color: var(--text-secondary);">Project: {{ group.project.name }}</p>
+        </div>
+        <div style="text-align: right;">
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Join Code</p>
+            <code style="background: rgba(255,255,255,0.1); padding: 0.5rem 1rem; border-radius: 0.5rem; color: var(--accent-secondary); font-size: 1.25rem; font-weight: bold; letter-spacing: 0.1rem;">{{ group.join_code }}</code>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+        <div>
+            <div class="glass-card" style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 style="font-size: 1.25rem; margin: 0;">Group <span style="color: var(--accent-secondary);">Tasks</span></h2>
+                    {% if is_leader %}
+                        <a href="{% url 'create_group_task' group.id %}" class="btn btn-primary" style="padding: 0.5rem 1.5rem; font-size: 0.9rem;">Assign New Task</a>
+                    {% endif %}
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    {% if tasks %}
+                        {% for task in tasks %}
+                            <div style="background: rgba(255,255,255,0.03); padding: 1.25rem; border-radius: 0.75rem; border-left: 5px solid {% if task.assigned_to == user %}var(--accent-secondary){% else %}var(--glass-border){% endif %};">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                    <h3 style="font-size: 1.1rem; margin: 0;">
+                                        {{ task.name }}
+                                        {% if task.assigned_to == user %}
+                                            <span style="background: var(--accent-secondary); color: white; font-size: 0.6rem; padding: 0.2rem 0.5rem; border-radius: 0.3rem; margin-left: 0.5rem; vertical-align: middle;">MY TASK</span>
+                                        {% endif %}
+                                    </h3>
+                                    <span class="badge badge-{{ task.status }}">{{ task.get_status_display }}</span>
+                                </div>
+                                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">{{ task.description }}</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--glass-border); padding-top: 0.75rem; font-size: 0.8rem;">
+                                    <div>
+                                        <span style="color: var(--text-secondary);">Assigned To:</span> <strong>{{ task.assigned_to.get_full_name }}</strong>
+                                        <span style="margin-left: 1rem; color: var(--text-secondary);">Due:</span> <strong>{{ task.deadline }}</strong>
+                                    </div>
+                                    <a href="{% url 'task_detail' task.id %}" style="color: var(--accent-secondary); text-decoration: none;">View →</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No tasks assigned to this group yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="glass-card" style="margin-bottom: 2rem;">
+                <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem;">Group <span style="color: var(--accent-secondary);">Members</span></h2>
+                <ul style="list-style: none;">
+                    {% for item in member_data %}
+                        <li style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--glass-border);">
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <div style="width: 10px; height: 10px; border-radius: 50%; background: {% if item.member.student == group.leader %}var(--accent-secondary){% else %}var(--accent-primary){% endif %};"></div>
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="font-size: 0.95rem;">
+                                        {{ item.member.student.get_full_name }}
+                                        {% if item.member.student == user %} <small style="color: var(--text-secondary);">(You)</small>{% endif %}
+                                    </span>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.2rem;">
+                                        {% if item.avg_rating %}
+                                            <span style="font-size: 0.7rem; color: gold;">★ {{ item.avg_rating|floatformat:1 }}</span>
+                                        {% else %}
+                                            <span style="font-size: 0.7rem; color: var(--text-secondary);">No ratings</span>
+                                        {% endif %}
+                                        {% if item.member.student == group.leader %}
+                                            <span style="font-size: 0.6rem; background: rgba(255,215,0,0.1); color: gold; padding: 0.1rem 0.3rem; border-radius: 0.2rem; border: 1px solid rgba(255,215,0,0.1);">LEADER</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if item.member.student != user %}
+                                <a href="{% url 'rate_member' group.id item.member.student.id %}" class="btn {% if item.has_been_rated %}btn-secondary{% else %}btn-primary{% endif %}" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
+                                    {% if item.has_been_rated %}Update Rating{% else %}Rate Member{% endif %}
+                                </a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="glass-card">
+                <h2 style="font-size: 1.1rem; margin-bottom: 1rem;">Actions</h2>
+                <a href="{% url 'student_project_detail' group.project.id %}" class="btn btn-secondary" style="width: 100%; text-align: center; display: block; margin-bottom: 0.75rem;">Back to Project</a>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); text-align: center;">You can share the join code with your teammates so they can join this group.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

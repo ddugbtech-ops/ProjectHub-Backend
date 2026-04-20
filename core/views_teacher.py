@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Project, Group, Task, Submission, GroupMember, ProjectMember
+from .models import Project, Group, Task, Submission, GroupMember, ProjectMember, ProjectMessage
 from .decorators import teacher_required
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -51,9 +51,28 @@ def project_detail(request, project_id):
     groups = project.groups.all()
     tasks = project.tasks.all().order_by('-deadline')
     
+    # Task status counts
+    todo_count = tasks.filter(status='todo').count()
+    in_progress_count = tasks.filter(status='in_progress').count()
+    completed_count = tasks.filter(status='completed').count()
+    
     project_members = ProjectMember.objects.filter(project=project).select_related('student')
+    
+    # Calculate average ratings for each student in this project
+    from django.db.models import Avg
+    for member in project_members:
+        ratings = TeamRating.objects.filter(group__project=project, ratee=member.student)
+        if ratings.exists():
+            avg_contrib = ratings.aggregate(Avg('contribution'))['contribution__avg']
+            avg_comm = ratings.aggregate(Avg('communication'))['communication__avg']
+            avg_collab = ratings.aggregate(Avg('collaboration'))['collaboration__avg']
+            member.avg_rating = (avg_contrib + avg_comm + avg_collab) / 3
+        else:
+            member.avg_rating = None
+
     students_in_groups = GroupMember.objects.filter(group__project=project).values_list('student_id', flat=True)
     unassigned_students = project_members.exclude(student_id__in=students_in_groups)
+    messages_list = project.messages.all().order_by('-created_at')
     
     return render(request, 'teacher/project_detail.html', {
         'project': project, 
@@ -61,8 +80,22 @@ def project_detail(request, project_id):
         'tasks': tasks,
         'project_members': project_members,
         'unassigned_students': unassigned_students,
-        'students_in_groups': students_in_groups
+        'students_in_groups': students_in_groups,
+        'messages': messages_list,
+        'todo_count': todo_count,
+        'in_progress_count': in_progress_count,
+        'completed_count': completed_count
     })
+
+@teacher_required
+def post_message(request, project_id):
+    project = get_object_or_404(Project, id=project_id, teacher=request.user)
+    if request.method == 'POST':
+        content = request.POST.get('content')
+        if content:
+            ProjectMessage.objects.create(project=project, user=request.user, content=content)
+            messages.success(request, "Message posted to discussion panel.")
+    return redirect('project_detail', project_id=project.id)
 
 @teacher_required
 def create_group(request, project_id):
@@ -72,8 +105,10 @@ def create_group(request, project_id):
     if request.method == 'POST':
         name = request.POST.get('name')
         selected_students = request.POST.getlist('students')
+        leader_id = request.POST.get('leader')
         
-        group = Group.objects.create(project=project, name=name)
+        leader = User.objects.get(id=leader_id) if leader_id else None
+        group = Group.objects.create(project=project, name=name, leader=leader)
         for student_id in selected_students:
             student = User.objects.get(id=student_id)
             GroupMember.objects.create(group=group, student=student)
@@ -139,6 +174,36 @@ def edit_task(request, task_id):
         messages.success(request, "Task updated successfully!")
         return redirect('project_detail', project_id=task.project.id)
     return render(request, 'teacher/edit_task.html', {'task': task})
+
+@teacher_required
+def edit_group(request, group_id):
+    group = get_object_or_404(Group, id=group_id, project__teacher=request.user)
+    project_members = ProjectMember.objects.filter(project=group.project)
+    current_members = group.members.values_list('student_id', flat=True)
+    
+    if request.method == 'POST':
+        group.name = request.POST.get('name')
+        leader_id = request.POST.get('leader')
+        selected_students = request.POST.getlist('students')
+        
+        if leader_id:
+            group.leader = User.objects.get(id=leader_id)
+        group.save()
+        
+        # Update members
+        group.members.all().delete()
+        for student_id in selected_students:
+            student = User.objects.get(id=student_id)
+            GroupMember.objects.create(group=group, student=student)
+            
+        messages.success(request, f"Group '{group.name}' updated successfully!")
+        return redirect('project_detail', project_id=group.project.id)
+        
+    return render(request, 'teacher/edit_group.html', {
+        'group': group,
+        'project_members': project_members,
+        'current_members': current_members
+    })
 
 @teacher_required
 def view_submissions(request):

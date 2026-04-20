@@ -30,6 +30,12 @@
                                 <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 0.5rem; margin-top: 0.5rem;">
                                     <strong>Commit Message:</strong><br>
                                     <span style="white-space: pre-line;">{{ submission.description }}</span>
+                                    {% if submission.file %}
+                                    <div style="margin-top: 1rem;">
+                                        <strong>Attached File:</strong> 
+                                        <a href="{{ submission.file.url }}" target="_blank" style="color: var(--accent-secondary); text-decoration: none;">Download/View File</a>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>
