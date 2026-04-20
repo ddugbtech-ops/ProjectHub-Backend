@@ -275,7 +275,7 @@ def edit_group(request, group_id):
 def view_progress(request):
     tasks = Task.objects.filter(assigned_to=request.user)
     completed_tasks = tasks.filter(status='completed').count()
-    todo_count = tasks.filter(status='todo').count()
+    todo_count = tasks.filter(status='pending').count()
     in_progress_count = tasks.filter(status='in_progress').count()
     total_tasks = tasks.count()
     progress = (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0

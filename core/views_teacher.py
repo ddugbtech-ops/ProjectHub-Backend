@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Project, Group, Task, Submission, GroupMember, ProjectMember, ProjectMessage
+from .models import Project, Group, Task, Submission, GroupMember, ProjectMember, ProjectMessage, TeamRating
 from .decorators import teacher_required
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.db.models import Avg
 
 @teacher_required
 def dashboard(request):
@@ -52,14 +53,13 @@ def project_detail(request, project_id):
     tasks = project.tasks.all().order_by('-deadline')
     
     # Task status counts
-    todo_count = tasks.filter(status='todo').count()
+    todo_count = tasks.filter(status='pending').count()
     in_progress_count = tasks.filter(status='in_progress').count()
     completed_count = tasks.filter(status='completed').count()
     
     project_members = ProjectMember.objects.filter(project=project).select_related('student')
     
     # Calculate average ratings for each student in this project
-    from django.db.models import Avg
     for member in project_members:
         ratings = TeamRating.objects.filter(group__project=project, ratee=member.student)
         if ratings.exists():
