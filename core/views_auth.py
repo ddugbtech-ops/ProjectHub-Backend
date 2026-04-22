@@ -86,3 +86,13 @@ def user_logout(request):
 
 def home(request):
     return render(request, 'home.html')
+
+from django.core.management import call_command
+from django.http import HttpResponse
+
+def run_migrations(request):
+    try:
+        call_command('migrate')
+        return HttpResponse("Migrations ran successfully! Your database is now up to date.")
+    except Exception as e:
+        return HttpResponse(f"Error running migrations: {str(e)}")

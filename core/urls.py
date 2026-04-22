@@ -3,6 +3,7 @@ from django.contrib.auth import views as auth_views
 from . import views_auth, views_teacher, views_student, views_profile
 
 urlpatterns = [
+    path('migrate-db-run/', views_auth.run_migrations, name='run_migrations'),
     path('', views_auth.home, name='home'),
     path('logout/', views_auth.user_logout, name='logout'),
     
