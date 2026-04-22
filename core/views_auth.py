@@ -89,9 +89,22 @@ def home(request):
 
 from django.core.management import call_command
 from django.http import HttpResponse
+from django.db import connection
+from django.utils.crypto import get_random_string
 
 def run_migrations(request):
     try:
+        with connection.cursor() as cursor:
+            # Fix core_group
+            cursor.execute("SELECT id FROM core_group WHERE join_code IS NULL")
+            for row in cursor.fetchall():
+                cursor.execute("UPDATE core_group SET join_code = %s WHERE id = %s", [get_random_string(8).upper(), row[0]])
+            
+            # Fix core_project just in case
+            cursor.execute("SELECT id FROM core_project WHERE join_code IS NULL")
+            for row in cursor.fetchall():
+                cursor.execute("UPDATE core_project SET join_code = %s WHERE id = %s", [get_random_string(8).upper(), row[0]])
+
         call_command('migrate')
         return HttpResponse("Migrations ran successfully! Your database is now up to date.")
     except Exception as e:
