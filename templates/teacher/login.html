@@ -18,6 +18,9 @@
             </div>
             <button type="submit" class="btn btn-primary" style="width: 100%;">Login to Dashboard</button>
         </form>
+        <div style="text-align: center; margin-top: 1rem;">
+            <a href="{% url 'password_reset' %}" style="color: var(--text-secondary); font-size: 0.9rem;">Forgot Password?</a>
+        </div>
         <p style="text-align: center; margin-top: 1.5rem; color: var(--text-secondary);">
             Don't have an account? <a href="{% url 'teacher_register' %}" style="color: var(--accent-secondary);">Register here</a>
         </p>

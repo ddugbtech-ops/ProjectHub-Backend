@@ -10,6 +10,11 @@ def teacher_register(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         
+        allowed_domains = ('.com', '.in', '.gov')
+        if not email.endswith(allowed_domains):
+            messages.error(request, "Only .com, .in, and .gov emails are allowed.")
+            return render(request, 'teacher/register.html')
+            
         if User.objects.filter(username=email).exists():
             messages.error(request, "Email already registered.")
         else:
@@ -43,6 +48,11 @@ def student_register(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         
+        allowed_domains = ('.com', '.in', '.gov')
+        if not email.endswith(allowed_domains):
+            messages.error(request, "Only .com, .in, and .gov emails are allowed.")
+            return render(request, 'student/register.html')
+            
         if User.objects.filter(username=email).exists():
             messages.error(request, "Email already registered.")
         else:
@@ -76,14 +86,3 @@ def user_logout(request):
 
 def home(request):
     return render(request, 'home.html')
-from django.core.management import call_command
-from django.http import HttpResponse
-import io
-
-def run_migrations(request):
-    out = io.StringIO()
-    try:
-        call_command('migrate', stdout=out, stderr=out)
-        return HttpResponse(f"<pre>{out.getvalue()}</pre>")
-    except Exception as e:
-        return HttpResponse(f"<pre>Error: {str(e)}\n\n{out.getvalue()}</pre>", status=500)

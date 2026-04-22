@@ -22,7 +22,11 @@
                     <li><a href="{% url 'student_dashboard' %}">Dashboard</a></li>
                     <li><a href="{% url 'student_progress' %}">Progress</a></li>
                 {% endif %}
-                <li><a href="{% url 'logout' %}" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</a></li>
+                <li style="margin-left: 1rem; margin-right: 1rem; display: flex; align-items: center;">
+                    <a href="{% url 'view_profile' %}" style="font-weight: 500; color: var(--accent-secondary); text-decoration: none; padding: 0.5rem;">
+                        {{ user.first_name|default:user.username }}
+                    </a>
+                </li>
             {% else %}
                 <li><a href="{% url 'home' %}">Home</a></li>
             {% endif %}

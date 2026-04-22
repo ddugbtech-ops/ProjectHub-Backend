@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - ProjectHub{% endblock %}
+
+{% block content %}
+<div class="fade-in" style="max-width: 600px; margin: 5rem auto;">
+    <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2>My Profile</h2>
+            <div style="display: flex; gap: 1rem;">
+                <a href="{% url 'edit_profile' %}" class="btn btn-primary">Edit Profile</a>
+                <a href="{% url 'logout' %}" class="btn btn-secondary">Logout</a>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <p style="color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">Name</p>
+            <p style="font-size: 1.2rem; font-weight: 500;">{{ user.first_name }} {{ user.last_name }}</p>
+            {% if not user.first_name and not user.last_name %}
+                <p style="color: var(--text-secondary); font-style: italic;">Not provided</p>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <p style="color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">Email</p>
+            <p style="font-size: 1.1rem;">{{ user.email }}</p>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <p style="color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">Role</p>
+            <p style="font-size: 1.1rem; text-transform: capitalize;">{{ user.profile.role }}</p>
+        </div>
+
+        {% if user.profile.role == 'teacher' %}
+            <div style="margin-bottom: 1.5rem;">
+                <p style="color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">Department</p>
+                <p style="font-size: 1.1rem;">{{ user.profile.department|default:"Not provided" }}</p>
+            </div>
+        {% elif user.profile.role == 'student' %}
+            <div style="margin-bottom: 1.5rem;">
+                <p style="color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">Major</p>
+                <p style="font-size: 1.1rem;">{{ user.profile.major|default:"Not provided" }}</p>
+            </div>
+        {% endif %}
+
+        <div style="margin-bottom: 1.5rem;">
+            <p style="color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">Bio</p>
+            <p style="font-size: 1.1rem; white-space: pre-wrap;">{{ user.profile.bio|default:"No bio provided." }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
