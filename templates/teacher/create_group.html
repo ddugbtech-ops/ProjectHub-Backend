@@ -1,47 +1,463 @@
 {% extends 'base.html' %}
 
-{% block title %}Create Group - {{ project.name }}{% endblock %}
+{% block title %}Create Group — {{ project.name }}{% endblock %}
 
 {% block content %}
-<div class="fade-in" style="max-width: 600px; margin: 3rem auto;">
-    <div class="glass-card">
-        <h2 style="margin-bottom: 2rem;">Create <span style="color: var(--accent-secondary);">New Group</span></h2>
-        <p style="margin-bottom: 2rem; color: var(--text-secondary);">Project: {{ project.name }}</p>
-        
-        <form method="POST">
-            {% csrf_token %}
-            <div class="form-group">
-                <label>Group Name</label>
-                <input type="text" name="name" required placeholder="e.g. Frontend Team">
-            </div>
+<style>
+  .cg-wrap {
+    max-width: 720px;
+    margin: 2.5rem auto;
+  }
 
-            <div class="form-group">
-                <label>Select Team Members</label>
-                <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0.5rem; max-height: 200px; overflow-y: auto; border: 1px solid var(--glass-border);">
-                    {% if project_members %}
-                        {% for member in project_members %}
-                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                <div style="display: flex; align-items: center; gap: 1rem;">
-                                    <input type="checkbox" name="students" value="{{ member.student.id }}" id="student_{{ member.student.id }}" style="width: auto;">
-                                    <label for="student_{{ member.student.id }}" style="margin: 0; cursor: pointer;">{{ member.student.get_full_name }}</label>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <input type="radio" name="leader" value="{{ member.student.id }}" id="leader_{{ member.student.id }}" style="width: auto;">
-                                    <label for="leader_{{ member.student.id }}" style="font-size: 0.75rem; color: var(--text-secondary); cursor: pointer;">Mark Leader</label>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <p style="color: var(--text-secondary); font-size: 0.9rem;">No students have joined this project yet.</p>
-                    {% endif %}
-                </div>
-            </div>
+  .cg-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
 
-            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                <button type="submit" class="btn btn-primary" style="flex: 2;">Create Group & Add Members</button>
-                <a href="{% url 'project_detail' project.id %}" class="btn btn-secondary" style="flex: 1;">Cancel</a>
-            </div>
-        </form>
+  .cg-header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  .cg-header h1 {
+    font-size: 1.6rem;
+    margin: 0;
+  }
+
+  .cg-header p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0.2rem 0 0;
+  }
+
+  /* ── Name input ── */
+  .name-input-wrap {
+    position: relative;
+  }
+
+  .name-input-wrap input {
+    width: 100%;
+    font-size: 1.1rem;
+    padding: 0.85rem 1rem 0.85rem 3rem;
+    background: rgba(255,255,255,0.05);
+    border: 1.5px solid var(--glass-border);
+    border-radius: 0.75rem;
+    color: var(--text-primary);
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+  }
+
+  .name-input-wrap input:focus {
+    outline: none;
+    border-color: var(--accent-secondary);
+    background: rgba(255,255,255,0.07);
+  }
+
+  .name-input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  /* ── Member grid ── */
+  .member-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .member-card {
+    position: relative;
+    border-radius: 0.75rem;
+    border: 1.5px solid var(--glass-border);
+    background: rgba(255,255,255,0.03);
+    padding: 0.9rem 1rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    user-select: none;
+  }
+
+  .member-card:hover:not(.disabled-card) {
+    border-color: var(--accent-secondary);
+    background: rgba(99,102,241,0.08);
+    transform: translateY(-2px);
+  }
+
+  .member-card.selected {
+    border-color: var(--accent-secondary);
+    background: rgba(99,102,241,0.12);
+  }
+
+  .member-card.disabled-card {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .member-card input[type="checkbox"] {
+    display: none;
+  }
+
+  .member-check-icon {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--glass-border);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .member-card.selected .member-check-icon {
+    background: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+    color: #fff;
+  }
+
+  .member-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+
+  .member-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 0.15rem;
+  }
+
+  .member-sub {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+  }
+
+  .already-badge {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    background: rgba(245,158,11,0.2);
+    color: #f59e0b;
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 999px;
+    padding: 0.1rem 0.45rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.2rem;
+  }
+
+  /* ── Leader select ── */
+  .leader-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(255,255,255,0.05);
+    border: 1.5px solid var(--glass-border);
+    border-radius: 0.75rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    appearance: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+  }
+
+  .leader-select:focus {
+    outline: none;
+    border-color: var(--accent-secondary);
+  }
+
+  .leader-select option {
+    background: #1a1a2e;
+  }
+
+  /* ── Preview bar ── */
+  .preview-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1.1rem;
+    background: rgba(99,102,241,0.08);
+    border: 1.5px solid rgba(99,102,241,0.25);
+    border-radius: 0.75rem;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    transition: all 0.3s;
+  }
+
+  .preview-bar strong {
+    color: var(--text-primary);
+  }
+
+  .preview-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent-secondary);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* ── Actions ── */
+  .cg-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .cg-actions .btn {
+    flex: 1;
+    text-align: center;
+    padding: 0.85rem;
+    font-size: 0.95rem;
+  }
+
+  /* ── Section labels ── */
+  .section-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .empty-state span {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+</style>
+
+<div class="cg-wrap fade-in">
+
+  <!-- Header -->
+  <div class="cg-header">
+    <div class="cg-header-icon">👥</div>
+    <div>
+      <h1>Create <span style="color: var(--accent-secondary);">New Group</span></h1>
+      <p>Project: <strong>{{ project.name }}</strong></p>
     </div>
+  </div>
+
+  <form method="POST" id="createGroupForm">
+    {% csrf_token %}
+
+    <!-- Group Name -->
+    <div class="glass-card" style="margin-bottom: 1.25rem;">
+      <p class="section-label">Group Name</p>
+      <div class="name-input-wrap">
+        <span class="name-input-icon">✏️</span>
+        <input type="text" name="name" id="groupNameInput"
+               required placeholder="e.g. Frontend Team, Group A…"
+               autocomplete="off">
+      </div>
+    </div>
+
+    <!-- Preview Bar -->
+    <div class="preview-bar" id="previewBar" style="margin-bottom: 1.25rem;">
+      <span id="previewCount" class="preview-count">0</span>
+      <span>
+        <strong id="previewName">Unnamed Group</strong>
+        &nbsp;·&nbsp; <span id="previewMemberText">No members selected yet</span>
+      </span>
+    </div>
+
+    <!-- Member Selection -->
+    <div class="glass-card" style="margin-bottom: 1.25rem;">
+      <p class="section-label">Select Team Members</p>
+
+      {% if project_members %}
+        <div class="member-grid" id="memberGrid">
+          {% for member in project_members %}
+            {% with sid=member.student.id %}
+            {% with initials=member.student.get_full_name %}
+            <label class="member-card {% if sid in already_in_group %}disabled-card{% endif %}"
+                   id="card_{{ sid }}"
+                   {% if sid in already_in_group %}title="Already in a group"{% endif %}>
+
+              <input type="checkbox"
+                     name="students"
+                     value="{{ sid }}"
+                     id="chk_{{ sid }}"
+                     {% if sid in already_in_group %}disabled{% endif %}>
+
+              <div class="member-check-icon" id="check_{{ sid }}">✓</div>
+
+              <div class="member-avatar" id="avatar_{{ sid }}">
+                {{ member.student.first_name|first|upper }}{{ member.student.last_name|first|upper }}
+              </div>
+
+              <div class="member-name">{{ member.student.get_full_name }}</div>
+              <div class="member-sub">{{ member.student.username }}</div>
+
+              {% if sid in already_in_group %}
+                <div class="already-badge">In a group</div>
+              {% endif %}
+            </label>
+            {% endwith %}
+            {% endwith %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <span>👤</span>
+          No students have joined this project yet.<br>
+          Share the project join code to invite students.
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Leader Selection (dynamic) -->
+    <div class="glass-card" style="margin-bottom: 1.25rem;">
+      <p class="section-label">Group Leader</p>
+      <div style="position: relative;">
+        <select name="leader" id="leaderSelect" class="leader-select">
+          <option value="">— Select a leader (optional) —</option>
+        </select>
+        <span style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);pointer-events:none;opacity:0.5;">▼</span>
+      </div>
+      <p style="font-size:0.75rem;color:var(--text-secondary);margin-top:0.5rem;">
+        Only selected members appear here. The leader must be a chosen member.
+      </p>
+    </div>
+
+    <!-- Actions -->
+    <div class="cg-actions">
+      <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+        🚀 Create Group
+      </button>
+      <a href="{% url 'project_detail' project.id %}" class="btn btn-secondary">
+        Cancel
+      </a>
+    </div>
+  </form>
 </div>
+
+<script>
+(function () {
+  const nameInput    = document.getElementById('groupNameInput');
+  const previewName  = document.getElementById('previewName');
+  const previewCount = document.getElementById('previewCount');
+  const previewText  = document.getElementById('previewMemberText');
+  const leaderSelect = document.getElementById('leaderSelect');
+  const submitBtn    = document.getElementById('submitBtn');
+  const cards        = document.querySelectorAll('.member-card:not(.disabled-card)');
+
+  // Build a map: student id → full name (from DOM)
+  const memberNames = {};
+  cards.forEach(card => {
+    const chk = card.querySelector('input[type="checkbox"]');
+    if (!chk) return;
+    const sid  = chk.value;
+    const name = card.querySelector('.member-name').textContent.trim();
+    memberNames[sid] = name;
+
+    card.addEventListener('click', () => toggleCard(card, chk, sid));
+  });
+
+  function toggleCard(card, chk, sid) {
+    chk.checked = !chk.checked;
+    card.classList.toggle('selected', chk.checked);
+    updatePreview();
+    updateLeaderDropdown();
+    updateSubmitState();
+  }
+
+  function updatePreview() {
+    const groupName  = nameInput.value.trim() || 'Unnamed Group';
+    const selected   = getSelected();
+    const count      = selected.length;
+
+    previewName.textContent  = groupName;
+    previewCount.textContent = count;
+    previewText.textContent  = count === 0
+      ? 'No members selected yet'
+      : count === 1
+        ? '1 member'
+        : `${count} members`;
+  }
+
+  function updateLeaderDropdown() {
+    const selected    = getSelected();
+    const currentVal  = leaderSelect.value;
+
+    // Clear options except first placeholder
+    while (leaderSelect.options.length > 1) leaderSelect.remove(1);
+
+    selected.forEach(({ id, name }) => {
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = name;
+      if (id === currentVal) opt.selected = true;
+      leaderSelect.appendChild(opt);
+    });
+  }
+
+  function updateSubmitState() {
+    const hasName    = nameInput.value.trim().length > 0;
+    const hasMembers = getSelected().length > 0;
+    submitBtn.disabled = !(hasName && hasMembers);
+    submitBtn.style.opacity = submitBtn.disabled ? '0.5' : '1';
+  }
+
+  function getSelected() {
+    const result = [];
+    cards.forEach(card => {
+      const chk = card.querySelector('input[type="checkbox"]');
+      if (chk && chk.checked) {
+        result.push({ id: chk.value, name: memberNames[chk.value] });
+      }
+    });
+    return result;
+  }
+
+  nameInput.addEventListener('input', () => {
+    updatePreview();
+    updateSubmitState();
+  });
+
+  // Initial state
+  updateSubmitState();
+})();
+</script>
+
 {% endblock %}

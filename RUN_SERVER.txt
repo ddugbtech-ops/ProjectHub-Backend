@@ -1,0 +1,16 @@
+To start the Django ProjectHub server, follow these steps:
+
+1. Open Command Prompt (cmd) or PowerShell
+2. Navigate to the ProjectHub directory:
+   cd e:\ProjectHub
+3. Run the Django server:
+   python manage.py runserver
+
+4. Open your web browser and go to:
+   http://127.0.0.1:8000
+
+If you encounter any issues, try:
+- python manage.py migrate
+- python manage.py collectstatic --noinput
+
+The server will start on port 8000 by default.

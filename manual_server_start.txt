@@ -1,0 +1,39 @@
+MANUAL DJANGO SERVER START INSTRUCTIONS
+
+The automated server startup is experiencing output issues. Please follow these manual steps:
+
+1. Open Command Prompt (cmd) or PowerShell
+2. Navigate to the project directory:
+   cd e:\ProjectHub
+
+3. Start the Django development server:
+   python manage.py runserver
+
+4. Alternative command with specific host:
+   python manage.py runserver 127.0.0.1:8000
+
+5. Alternative command with no auto-reload:
+   python manage.py runserver --noreload
+
+6. Once server is running, open your browser and go to:
+   http://127.0.0.1:8000
+   or
+   http://localhost:8000
+
+7. To stop the server, press Ctrl+C in the terminal
+
+TROUBLESHOOTING:
+- If you get "command not found", make sure Python is in your PATH
+- If you get "No module named django", install Django: pip install django
+- If port 8000 is in use, try: python manage.py runserver 8001
+- If you see database errors, run: python manage.py migrate
+
+The server should display output like:
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+January 20, 2025 - 15:30:00
+Django version 5.0, using settings 'projecthub.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CTRL-C.

@@ -12,21 +12,24 @@
 </head>
 <body>
     <nav>
-        <a href="{% url 'home' %}" class="logo">ProjectHub</a>
+        <a href="{% url 'home' %}" class="logo">Contri Tracker</a>
         <ul>
             {% if user.is_authenticated %}
                 {% if user.profile.role == 'teacher' %}
-                    <li><a href="{% url 'teacher_dashboard' %}">Dashboard</a></li>
-                    <li><a href="{% url 'teacher_submissions' %}">Submissions</a></li>
+                    <li style="margin-left: 1rem; margin-right: 1rem; display: flex; align-items: center;"><a href="{% url 'teacher_dashboard' %}">Dashboard</a></li>
+                    <li style="margin-left: 1rem; margin-right: 1rem; display: flex; align-items: center;"><a href="{% url 'teacher_submissions' %}">Submissions</a></li>
                 {% else %}
-                    <li><a href="{% url 'student_dashboard' %}">Dashboard</a></li>
-                    <li><a href="{% url 'student_progress' %}">Progress</a></li>
+                    <li style="margin-left: 1rem; margin-right: 1rem; display: flex; align-items: center;"><a href="{% url 'student_dashboard' %}">Dashboard</a></li>
+                    <li style="margin-left: 1rem; margin-right: 1rem; display: flex; align-items: center;"><a href="{% url 'student_progress' %}">Progress</a></li>
                 {% endif %}
                 <li style="margin-left: 1rem; margin-right: 1rem; display: flex; align-items: center;">
-                    <a href="{% url 'view_profile' %}" style="font-weight: 500; color: var(--accent-secondary); text-decoration: none; padding: 0.5rem;">
-                        {{ user.first_name|default:user.username }}
-                    </a>
-                </li>
+    <a href="{% url 'view_profile' %}" style="font-weight: 500; color: var(--accent-secondary); text-decoration: none; padding: 0.5rem; display: flex; align-items: center; gap: 0.4rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+        </svg>
+        {{ user.first_name|default:user.username }}
+    </a>
+</li>
             {% else %}
                 <li><a href="{% url 'home' %}">Home</a></li>
             {% endif %}

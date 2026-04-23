@@ -116,9 +116,13 @@ def create_group(request, project_id):
         messages.success(request, f"Group '{name}' created with {len(selected_students)} members!")
         return redirect('project_detail', project_id=project.id)
         
+    already_in_group = set(
+        GroupMember.objects.filter(group__project=project).values_list('student_id', flat=True)
+    )
     return render(request, 'teacher/create_group.html', {
         'project': project,
-        'project_members': project_members
+        'project_members': project_members,
+        'already_in_group': already_in_group,
     })
 
 @teacher_required
