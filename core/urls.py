@@ -34,6 +34,7 @@ urlpatterns = [
     path('teacher/project/<int:project_id>/group/create/', views_teacher.create_group, name='teacher_create_group'),
     path('teacher/project/<int:project_id>/task/create/', views_teacher.create_task, name='create_task'),
     path('teacher/task/<int:task_id>/edit/', views_teacher.edit_task, name='edit_task'),
+    path('teacher/group/<int:group_id>/', views_teacher.group_detail, name='teacher_group_detail'),
     path('teacher/group/<int:group_id>/edit/', views_teacher.edit_group, name='edit_group'),
     path('teacher/project/<int:project_id>/message/', views_teacher.post_message, name='teacher_post_message'),
     path('teacher/submissions/', views_teacher.view_submissions, name='teacher_submissions'),

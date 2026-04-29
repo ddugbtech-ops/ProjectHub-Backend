@@ -9,8 +9,10 @@
             <h1>{{ project.name }}</h1>
             {% if final_submission %}
                 <span class="badge badge-completed" style="width: fit-content; padding: 0.5rem 1rem;">✓ Final Project Submitted</span>
-            {% else %}
+            {% elif user_group and user_group.leader == user %}
                 <a href="{% url 'submit_project_final' project.id %}" class="btn btn-primary" style="width: fit-content; padding: 0.5rem 1rem; font-size: 0.85rem;">Submit Final Project</a>
+            {% else %}
+                <span class="badge" style="background: var(--glass-border); color: var(--text-secondary); width: fit-content; padding: 0.5rem 1rem;">Waiting for Leader to Submit</span>
             {% endif %}
         </div>
         <div style="text-align: right;">
@@ -70,7 +72,9 @@
                             <a href="{% url 'create_group' project.id %}" class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.8rem;">Create Group</a>
                         </div>
                     {% else %}
-                        <a href="{% url 'student_group_detail' user_group.id %}" class="btn btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.8rem;">View Group Details →</a>
+                        {% if user_group.leader == user %}
+                            <a href="{% url 'student_group_detail' user_group.id %}" class="btn btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.8rem;">View Group Details →</a>
+                        {% endif %}
                     {% endif %}
                 </div>
 
@@ -82,8 +86,10 @@
                                 <p style="font-size: 0.85rem; color: var(--text-secondary);">Leader: {{ user_group.leader.get_full_name }}</p>
                             </div>
                             <div style="text-align: right;">
-                                <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Join Code</p>
-                                <code style="background: rgba(255,255,255,0.1); padding: 0.2rem 0.5rem; border-radius: 0.3rem; color: var(--accent-secondary); font-size: 1rem; font-weight: bold;">{{ user_group.join_code }}</code>
+                                {% if user_group.leader == user %}
+                                    <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Join Code</p>
+                                    <code style="background: rgba(255,255,255,0.1); padding: 0.2rem 0.5rem; border-radius: 0.3rem; color: var(--accent-secondary); font-size: 1rem; font-weight: bold;">{{ user_group.join_code }}</code>
+                                {% endif %}
                             </div>
                         </div>
                         <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
@@ -143,8 +149,10 @@
                     <h1>Project <span style="color: var(--accent-primary);">Details</span></h1>
                     {% if final_submission %}
                         <span class="badge badge-completed" style="padding: 0.75rem 1.5rem; font-size: 0.9rem;">✓ Project Submitted</span>
-                    {% else %}
+                    {% elif user_group and user_group.leader == user %}
                         <a href="{% url 'submit_project_final' project.id %}" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">Submit Final Project</a>
+                    {% else %}
+                        <span class="badge" style="background: var(--glass-border); color: var(--text-secondary); padding: 0.75rem 1.5rem; font-size: 0.9rem;">Waiting for Leader to Submit</span>
                     {% endif %}
                 </div>
                 

@@ -65,10 +65,18 @@ def submit_project(request, project_id):
     project = get_object_or_404(Project, id=project_id, members__student=request.user)
     user_group = Group.objects.filter(project=project, members__student=request.user).first()
     
+    if not user_group or user_group.leader != request.user:
+        messages.error(request, "Only the group leader can submit the final project.")
+        return redirect('student_project_detail', project_id=project.id)
+    
     if request.method == 'POST':
         description = request.POST.get('description')
         github_link = request.POST.get('github_link')
         file = request.FILES.get('file')
+        
+        if file and file.size > 25 * 1024 * 1024:
+            messages.error(request, "File size exceeds the 25 MB limit.")
+            return redirect('submit_project_final', project_id=project.id)
         
         ProjectSubmission.objects.create(
             project=project,
@@ -138,9 +146,14 @@ def join_group(request):
 @student_required
 def group_detail(request, group_id):
     group = get_object_or_404(Group, id=group_id, members__student=request.user)
+    
+    if group.leader != request.user:
+        messages.error(request, "Only the group leader can view all group details.")
+        return redirect('student_project_detail', project_id=group.project.id)
+        
     members = group.members.all().select_related('student')
     tasks = group.tasks.all().order_by('-deadline')
-    is_leader = (group.leader == request.user)
+    is_leader = True
     
     # Get existing ratings given by this user in this group
     given_ratings = TeamRating.objects.filter(group=group, rater=request.user).values_list('ratee_id', flat=True)
@@ -252,6 +265,11 @@ def submit_work(request, task_id):
     if request.method == 'POST':
         description = request.POST.get('description')
         file = request.FILES.get('file')
+        
+        if file and file.size > 25 * 1024 * 1024:
+            messages.error(request, "File size exceeds the 25 MB limit.")
+            return redirect('submit_work', task_id=task.id)
+            
         Submission.objects.create(task=task, student=request.user, description=description, file=file)
         task.status = 'completed'
         task.save()

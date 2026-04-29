@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Project, Group, Task, Submission, GroupMember, ProjectMember, ProjectMessage, TeamRating
+from .models import Project, Group, Task, Submission, GroupMember, ProjectMember, ProjectMessage, TeamRating, ProjectSubmission
 from .decorators import teacher_required
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -180,6 +180,36 @@ def edit_task(request, task_id):
     return render(request, 'teacher/edit_task.html', {'task': task})
 
 @teacher_required
+def group_detail(request, group_id):
+    group = get_object_or_404(Group, id=group_id, project__teacher=request.user)
+    members = GroupMember.objects.filter(group=group).select_related('student', 'student__profile')
+    tasks = group.tasks.all().order_by('-deadline')
+    
+    member_data = []
+    for member in members:
+        ratings = TeamRating.objects.filter(group=group, ratee=member.student)
+        if ratings.exists():
+            avg_contrib = ratings.aggregate(Avg('contribution'))['contribution__avg']
+            avg_comm = ratings.aggregate(Avg('communication'))['communication__avg']
+            avg_collab = ratings.aggregate(Avg('collaboration'))['collaboration__avg']
+            avg_rating = (avg_contrib + avg_comm + avg_collab) / 3
+        else:
+            avg_rating = None
+            
+        member_data.append({
+            'student': member.student,
+            'profile': member.student.profile if hasattr(member.student, 'profile') else None,
+            'is_leader': group.leader == member.student,
+            'avg_rating': avg_rating,
+        })
+        
+    return render(request, 'teacher/group_detail.html', {
+        'group': group,
+        'member_data': member_data,
+        'tasks': tasks,
+    })
+
+@teacher_required
 def edit_group(request, group_id):
     group = get_object_or_404(Group, id=group_id, project__teacher=request.user)
     project_members = ProjectMember.objects.filter(project=group.project)
@@ -212,4 +242,8 @@ def edit_group(request, group_id):
 @teacher_required
 def view_submissions(request):
     submissions = Submission.objects.filter(task__project__teacher=request.user).order_by('-submitted_at')
-    return render(request, 'teacher/submissions.html', {'submissions': submissions})
+    final_submissions = ProjectSubmission.objects.filter(project__teacher=request.user).order_by('-submitted_at')
+    return render(request, 'teacher/submissions.html', {
+        'submissions': submissions,
+        'final_submissions': final_submissions
+    })
